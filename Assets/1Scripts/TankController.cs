@@ -6,6 +6,7 @@ public class TankController : NetworkBehaviour
     [SerializeField] private GameObject barrelObj;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float moveSpeed = 3f;
+    private NetworkCharacterController _characterController;
     private int _playerId = -1;
     private int _health = 100;
     private Animator _animator;
@@ -14,14 +15,16 @@ public class TankController : NetworkBehaviour
     {
         _animator = GetComponent<Animator>();
         _playerId = InGameManager.Instance.GetPlayerId();
+        _characterController = GetComponent<NetworkCharacterController>();
     }
     void Update()
     {
-        PlayerInput();
+        //PlayerInput();
     }
     public override void FixedUpdateNetwork()
     {
         TankMove();
+        PlayerInput();
     }
     void PlayerInput()
     {
