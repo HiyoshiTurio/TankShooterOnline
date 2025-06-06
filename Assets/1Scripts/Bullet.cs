@@ -1,15 +1,16 @@
+using Fusion;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public class Bullet : NetworkBehaviour
 {
     [SerializeField] private float speed = 10f;
     private int _damage = 1;
     private int _shooterId = -1;
-    void Start()
+    public override void Spawned()
     {
         Destroy(gameObject, 5f);
     }
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         transform.position += transform.right * speed / 60;
     }

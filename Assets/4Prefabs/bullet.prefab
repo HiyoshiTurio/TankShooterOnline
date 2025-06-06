@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 2130029460814417975}
   - component: {fileID: 4855214509939991362}
   - component: {fileID: 807911366490868258}
-  - component: {fileID: 8200585262926875028}
-  - component: {fileID: -3544965081245729617}
+  - component: {fileID: 5528442077483645835}
+  - component: {fileID: 7091539897321298880}
+  - component: {fileID: 2986839861211287513}
   m_Layer: 0
   m_Name: bullet
   m_TagString: Untagged
@@ -100,7 +101,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
---- !u!61 &8200585262926875028
+--- !u!114 &5528442077483645835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2501669920123853025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 2525665931
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 807911366490868258}
+  ForceRemoteRenderTimeframe: 0
+--- !u!61 &7091539897321298880
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143,9 +163,9 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.43, y: 0.19}
+  m_Size: {x: 0.46, y: 0.19}
   m_EdgeRadius: 0
---- !u!50 &-3544965081245729617
+--- !u!50 &2986839861211287513
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 0

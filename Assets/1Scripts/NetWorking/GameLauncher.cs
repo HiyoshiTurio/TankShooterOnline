@@ -26,7 +26,10 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
             var rand = UnityEngine.Random.insideUnitCircle * 5f;
             var spawnPosition = new Vector3(rand.x, 2f, rand.y);
             // 自分自身のアバターをスポーンする
-            runner.Spawn(playerAvatarPrefab, spawnPosition, Quaternion.identity);
+            runner.Spawn(playerAvatarPrefab, spawnPosition, Quaternion.identity, onBeforeSpawned: (_, networkObject) => {
+                // プレイヤー名のネットワークプロパティの初期値として、ランダムな名前を設定する
+                networkObject.GetComponent<TankController>().NickName = $"Player{UnityEngine.Random.Range(0, 10000)}";
+            });
         }
     }
 
