@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using Fusion;
+using Fusion.Sockets;
 using UnityEngine;
 
 public class TankController : NetworkBehaviour
@@ -6,46 +9,68 @@ public class TankController : NetworkBehaviour
     [SerializeField] private GameObject barrelObj;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float moveSpeed = 3f;
-    [Networked]
-    public NetworkString<_16> NickName { get; set; }
+    [Networked] public NetworkString<_16> NickName { get; set; }
+    [Networked] public NetworkButtons ButtonsPrevious { get; set; }
     private PlayerView _playerView;
     private NetworkCharacterController _characterController;
+    //private Animator _animator;
     private int _playerId = -1;
     private int _health = 100;
-    private Animator _animator;
     public int PlayerId => _playerId;
+
     public override void Spawned()
     {
-        _animator = GetComponent<Animator>();
+        //_animator = GetComponent<Animator>();
         _playerId = InGameManager.Instance.GetPlayerId();
         _characterController = GetComponent<NetworkCharacterController>();
         _playerView = GetComponent<PlayerView>();
         _playerView.SetNickName(NickName.Value);
     }
 
-    // public override void Render()
-    // {
-    //     PlayerInput();
-    // }
     public override void FixedUpdateNetwork()
     {
-        TankMove();
-        PlayerInput();
-    }
-    void PlayerInput()
-    {
-        RotateBarrel();
-        if (Input.GetButtonDown("Fire1"))
+        if (GetInput<MyInput>(out var input) == false)
         {
-            GameObject bullet = Instantiate(bulletPrefab, barrelObj.transform.position, barrelObj.transform.rotation);
-            bullet.GetComponent<Bullet>().SetShooterId(_playerId);
+            Debug.Log("No input");
+            return;
+        };
+        Debug.Log("Input: " + input.Buttons);
+
+        // compute pressed/released state
+        var pressed = input.Buttons.GetPressed(ButtonsPrevious);
+        var released = input.Buttons.GetReleased(ButtonsPrevious);
+
+        // store latest input as 'previous' state we had
+        ButtonsPrevious = input.Buttons;
+
+        // movement (check for down)
+        var vector = default(Vector3);
+
+        if (input.Buttons.IsSet(MyButtons.Forward)) { vector.y += 1; }
+        if (input.Buttons.IsSet(MyButtons.Backward)) { vector.y -= 1; }
+
+        if (input.Buttons.IsSet(MyButtons.Left)) { vector.x  -= 1; }
+        if (input.Buttons.IsSet(MyButtons.Right)) { vector.x += 1; }
+
+        TankMove(vector);
+
+        // jump (check for pressed)
+        if (pressed.IsSet(MyButtons.Jump)) {
+            //DoJump();
+            Debug.Log("Jump");
+        }
+
+        if (pressed.IsSet(MyButtons.Attack))
+        {
+            Debug.Log("Attack");
+            Shot(barrelObj.transform.position, barrelObj.transform.rotation, _playerId);
         }
     }
-
-    void TankMove()
+    void TankMove(Vector3 vector)
     {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        Debug.Log("Move: " + vector);
+        float h = vector.x;
+        float v = vector.y;
         Vector3 vec = new Vector3(h, v, 0).normalized;
         transform.position += vec * moveSpeed / 60;
         if (h > 0.1 || v > 0.1 || h < -0.1 || v < -0.1)
@@ -61,5 +86,31 @@ public class TankController : NetworkBehaviour
         float angle = Mathf.Atan2(tmp.y, tmp.x) * Mathf.Rad2Deg;
         barrelObj.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
-    public void TakeDamage(int damage) { _health -= damage; }
+
+    private void Shot(Vector3 instancePosition,Quaternion direction, int shooterId)
+    {
+        GameObject bullet = Instantiate(bulletPrefab, instancePosition, direction);
+        bullet.GetComponent<Bullet>().SetShooterId(shooterId);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        _health -= damage;
+    }
+}
+[Serializable]
+public struct MyInput : INetworkInput
+{
+    public NetworkButtons Buttons;
+    public Vector3 AimDirection;
+}
+
+public enum MyButtons
+{
+    Forward = 0,
+    Backward = 1,
+    Left = 2,
+    Right = 3,
+    Jump = 4,
+    Attack = 5,
 }
