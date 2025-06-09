@@ -6,28 +6,17 @@ using UnityEngine;
 
 public class InputProvider : SimulationBehaviour, INetworkRunnerCallbacks 
 {
-    MyInput _myInput = new MyInput();
-    // public void OnEnable()
-    // {
-    //     if(Runner != null) 
-    //     {
-    //         Debug.Log("Adding callbacks to runner");
-    //         Runner.AddCallbacks( this );
-    //     }
-    //     else
-    //     {
-    //         Debug.Log("Runner is null");
-    //     }
-    // }
-
-    public void Update()
+    public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        if (Input.GetMouseButtonDown(0)) 
+        MyInput _myInput = new MyInput();
+        if (Input.GetMouseButton(0)) 
         {
+            Debug.Log("Attack button pressed");
             _myInput.Buttons.Set(MyButtons.Attack, true);
         }
-        if (Input.GetKeyDown(KeyCode.Space)) 
+        if (Input.GetKey(KeyCode.Space)) 
         {
+            Debug.Log("Jump button pressed");
             _myInput.Buttons.Set(MyButtons.Jump, true);
         }
         if (Input.GetKey(KeyCode.A))
@@ -46,15 +35,10 @@ public class InputProvider : SimulationBehaviour, INetworkRunnerCallbacks
         {
             _myInput.Buttons.Set(MyButtons.Backward, true);
         }
-    }
-
-    public void OnInput(NetworkRunner runner, NetworkInput input)
-    {
-        input.Set(_myInput);
-        Debug.Log("Sending input");
+        Debug.Log("Sending input : "+ input.Set(_myInput));
         // Reset the input struct to start with a clean slate
         // when polling for the next tick
-        _myInput = default;
+        //_myInput = default;
     }
 
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }

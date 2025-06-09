@@ -311,7 +311,6 @@ GameObject:
   - component: {fileID: 5284111508294089568}
   - component: {fileID: 4681039458330992337}
   - component: {fileID: 4902495280529942116}
-  - component: {fileID: -7055511233044291980}
   m_Layer: 0
   m_Name: body_black_01
   m_TagString: Player
@@ -537,15 +536,3 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 3165589263119331829}
   ForceRemoteRenderTimeframe: 0
---- !u!114 &-7055511233044291980
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5342917357446227927}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7786ae8051f6d743b6cf5547d7e3f54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

@@ -8,12 +8,14 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkRunner networkRunnerPrefab;
     [SerializeField] private NetworkPrefabRef playerAvatarPrefab;
+    //[SerializeField] private InputProvider inputProviderPrefab;
 
     private async void Start()
     {
         // NetworkRunnerを生成する
         var networkRunner = Instantiate(networkRunnerPrefab);
         networkRunner.AddCallbacks(this);
+        networkRunner.AddCallbacks(networkRunner.GetComponent<InputProvider>());
         // 共有モードのセッションに参加する
         var result = await networkRunner.StartGame(new StartGameArgs { GameMode = GameMode.Shared });
         // 結果をコンソールに出力する
@@ -29,8 +31,9 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
             var playerAvatar = runner.Spawn(playerAvatarPrefab, spawnPosition, Quaternion.identity, onBeforeSpawned: (_, networkObject) => {
                 // プレイヤー名のネットワークプロパティの初期値として、ランダムな名前を設定する
                 networkObject.GetComponent<TankController>().NickName = $"Player{UnityEngine.Random.Range(0, 10000)}";
-            });
-            runner.AddCallbacks(playerAvatar.GetComponent<InputProvider>());
+            }, inputAuthority:player);
+            //runner.SetPlayerObject(player, playerAvatar);
+            //runner.AddCallbacks(Instantiate(inputProviderPrefab));
         }
     }
 

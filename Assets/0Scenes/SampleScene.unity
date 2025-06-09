@@ -243,6 +243,7 @@ MonoBehaviour:
   networkRunnerPrefab: {fileID: 6611863341983374623, guid: f2bbbe6d5d6d1364f91d504c17324caa, type: 3}
   playerAvatarPrefab:
     RawGuidValue: 692122e7e2fbe1b45abdb39869c4148f
+  inputProviderPrefab: {fileID: 7977759918624504283, guid: ead436c251fd8314e9752453238587ee, type: 3}
 --- !u!4 &723763327
 Transform:
   m_ObjectHideFlags: 0
