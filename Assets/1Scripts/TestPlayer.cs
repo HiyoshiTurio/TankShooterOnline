@@ -1,13 +1,12 @@
-using Fusion;
 using UnityEngine;
+using Fusion;
 
-public class TankController : NetworkBehaviour, INetworkInput
+public class TestPlayer : NetworkBehaviour
 {
     [SerializeField] private GameObject barrelObj;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float moveSpeed = 3f;
     [Networked] public NetworkString<_16> NickName { get; set; }
-    [Networked] public NetworkButtons ButtonsPrevious { get; set; }
     private PlayerView _playerView;
     //private Animator _animator;
     private int _playerId = -1;
@@ -24,41 +23,24 @@ public class TankController : NetworkBehaviour, INetworkInput
 
     public override void FixedUpdateNetwork()
     {
-        if (GetInput<MyInput>(out var input) == false)
-        {
-            Debug.Log("No input");
-            return;
-        };
-        
-        // compute pressed/released state
-        var pressed = input.Buttons.GetPressed(ButtonsPrevious);
-        var released = input.Buttons.GetReleased(ButtonsPrevious);
-
-        // store latest input as 'previous' state we had
-        ButtonsPrevious = input.Buttons;
-
         // movement (check for down)
-        var vector = default(Vector3);
-
-        if (input.Buttons.IsSet(MyButtons.Forward)) { vector.y += 1; }
-        if (input.Buttons.IsSet(MyButtons.Backward)) { vector.y -= 1; }
-
-        if (input.Buttons.IsSet(MyButtons.Left)) { vector.x  -= 1; }
-        if (input.Buttons.IsSet(MyButtons.Right)) { vector.x += 1; }
+        var vector = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
+        vector.Normalize();
 
         TankMove(vector);
 
         // jump (check for pressed)
-        if (pressed.IsSet(MyButtons.Jump)) {
+        if (Input.GetButton("Jump")) {
             //DoJump();
             Debug.Log("Jump");
         }
 
-        if (pressed.IsSet(MyButtons.Attack))
+        if (Input.GetButtonDown("Fire1"))
         {
             Debug.Log("Attack");
             Shot(barrelObj.transform.position, barrelObj.transform.rotation, _playerId);
         }
+        RotateBarrel();
     }
     void TankMove(Vector3 vector)
     {
@@ -90,20 +72,4 @@ public class TankController : NetworkBehaviour, INetworkInput
     {
         _health -= damage;
     }
-}
-
-public struct MyInput : INetworkInput
-{
-    public NetworkButtons Buttons;
-    //public Vector3 AimDirection;
-}
-
-enum MyButtons
-{
-    Forward = 0,
-    Backward = 1,
-    Left = 2,
-    Right = 3,
-    Jump = 4,
-    Attack = 5,
 }

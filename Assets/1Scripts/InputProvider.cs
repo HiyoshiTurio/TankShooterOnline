@@ -8,37 +8,34 @@ public class InputProvider : SimulationBehaviour, INetworkRunnerCallbacks
 {
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        MyInput _myInput = new MyInput();
+        MyInput myInput = new MyInput();
         if (Input.GetMouseButton(0)) 
         {
-            Debug.Log("Attack button pressed");
-            _myInput.Buttons.Set(MyButtons.Attack, true);
+            myInput.Buttons.Set(MyButtons.Attack, true);
         }
         if (Input.GetKey(KeyCode.Space)) 
         {
-            Debug.Log("Jump button pressed");
-            _myInput.Buttons.Set(MyButtons.Jump, true);
+            myInput.Buttons.Set(MyButtons.Jump, true);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            _myInput.Buttons.Set(MyButtons.Left, true);
+            myInput.Buttons.Set(MyButtons.Left, true);
         }
         if (Input.GetKey(KeyCode.D))
         {
-            _myInput.Buttons.Set(MyButtons.Right, true);
+            myInput.Buttons.Set(MyButtons.Right, true);
         }
         if (Input.GetKey(KeyCode.W))
         {
-            _myInput.Buttons.Set(MyButtons.Forward, true);
+            myInput.Buttons.Set(MyButtons.Forward, true);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            _myInput.Buttons.Set(MyButtons.Backward, true);
+            myInput.Buttons.Set(MyButtons.Backward, true);
         }
-        Debug.Log("Sending input : "+ input.Set(_myInput));
+        Debug.Log("Sending input : "+ input.Set(myInput));
         // Reset the input struct to start with a clean slate
         // when polling for the next tick
-        //_myInput = default;
     }
 
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }

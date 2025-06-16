@@ -4,12 +4,11 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
 
-public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
+public class TestGameLouncher : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkRunner networkRunnerPrefab;
     [SerializeField] private NetworkPrefabRef playerAvatarPrefab;
-    private NetworkRunner _networkRunner;
-    //[SerializeField] private InputProvider inputProviderPrefab;
+    NetworkRunner _networkRunner;
 
     private async void Start()
     {
@@ -32,7 +31,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
             runner.Spawn(playerAvatarPrefab, spawnPosition, Quaternion.identity, onBeforeSpawned: (_, networkObject) => {
                 // プレイヤー名のネットワークプロパティの初期値として、ランダムな名前を設定する
                 networkObject.GetComponent<TestPlayer>().NickName = $"Player{UnityEngine.Random.Range(0, 10000)}";
-            }, inputAuthority:player);
+            });
             //runner.SetPlayerObject(player, playerAvatar);
             //runner.AddCallbacks(Instantiate(inputProviderPrefab));
         }
