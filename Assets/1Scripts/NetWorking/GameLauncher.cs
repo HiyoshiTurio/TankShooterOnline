@@ -11,39 +11,52 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private GameObject inGameManagerPrefab;
     private NetworkRunner _networkRunner;
 
-    private async void Start()
+    private async void Start() 
     {
         // NetworkRunnerを生成する
         _networkRunner = Instantiate(networkRunnerPrefab);
         _networkRunner.AddCallbacks(this);
-        _networkRunner.AddCallbacks(_networkRunner.GetComponent<InputProvider>());
-        // 共有モードのセッションに参加する
-        var result = await _networkRunner.StartGame(new StartGameArgs { GameMode = GameMode.Shared });
-        // 結果をコンソールに出力する
-        Debug.Log(result);
+        // StartGameArgsに渡した設定で、セッションに参加する
+        var result = await _networkRunner.StartGame(new StartGameArgs 
+        {
+            GameMode = GameMode.AutoHostOrClient,
+            SceneManager = _networkRunner.GetComponent<NetworkSceneManagerDefault>()
+        });
 
-        GameObject manager = Instantiate(inGameManagerPrefab);
-        manager.GetComponent<InGameManager>().SetRunner(_networkRunner);
+        if (result.Ok)
+            Debug.Log("成功！");
+        else
+            Debug.Log("失敗！");
     }
-    void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player) {
-        // セッションへ参加したプレイヤーが自分自身かどうかを判定する
-        if (player == runner.LocalPlayer) {
-            // アバターの初期位置を計算する（半径5の円の内部のランダムな点）
-            var rand = UnityEngine.Random.insideUnitCircle * 5f;
-            var spawnPosition = new Vector3(rand.x, 2f, rand.y);
-            // 自分自身のアバターをスポーンする
-            var playerAvater = runner.Spawn(playerAvatarPrefab, spawnPosition, Quaternion.identity, onBeforeSpawned: (_, networkObject) => {
-                // プレイヤー名のネットワークプロパティの初期値として、ランダムな名前を設定する
-                networkObject.GetComponent<TankController>().NickName = $"Player{UnityEngine.Random.Range(0, 10000)}";
-            });
-            //runner.SetPlayerObject(player, playerAvatar);
-            //runner.AddCallbacks(Instantiate(inputProviderPrefab));
+    // セッションへプレイヤーが参加した時に呼ばれるコールバック
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) 
+    {
+        // ホスト（サーバー兼クライアント）かどうかはIsServerで判定できる
+        if (!runner.IsServer) { return; }
+        // ランダムな生成位置（半径5の円の内部）を取得する
+        var randomValue = UnityEngine.Random.insideUnitCircle * 5f;
+        var spawnPosition = new Vector3(randomValue.x, 5f, randomValue.y);
+        // 参加したプレイヤーのアバターを生成する
+        var avatar = runner.Spawn(playerAvatarPrefab, spawnPosition, Quaternion.identity, player);
+        // プレイヤー（PlayerRef）とアバター（NetworkObject）を関連付ける
+        runner.SetPlayerObject(player, avatar);
+    }
+    // セッションからプレイヤーが退出した時に呼ばれるコールバック
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        if (!runner.IsServer)
+        {
+            return;
+        }
+        // 退出したプレイヤーのアバターを破棄する
+        if (runner.TryGetPlayerObject(player, out var avatar))
+        {
+            runner.Despawn(avatar);
         }
     }
 
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }

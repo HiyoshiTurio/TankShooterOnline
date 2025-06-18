@@ -7,8 +7,9 @@ public class TankController : NetworkBehaviour, INetworkInput
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float moveSpeed = 3f;
     [Networked] public NetworkString<_16> NickName { get; set; }
+    [Networked] public NetworkButtons InputPrevious { get; set; }
     private PlayerView _playerView;
-    private NetworkRunner _runner;
+    //private NetworkRunner _networkRunner;
     //private Animator _animator;
     private int _playerId = -1;
     private int _health = 100;
@@ -19,7 +20,7 @@ public class TankController : NetworkBehaviour, INetworkInput
         //_animator = GetComponent<Animator>();
         _playerView = GetComponent<PlayerView>();
         _playerView.SetNickName(NickName.Value);
-        _runner = InGameManager.Instance.Runner;
+        //_networkRunner = InGameManager.Instance.Runner;
     }
 
     void Update()
@@ -28,7 +29,6 @@ public class TankController : NetworkBehaviour, INetworkInput
             //DoJump();
             Debug.Log("Jump");
         }
-
         if (Input.GetButtonDown("Fire1"))
         {
             Shot(barrelObj.transform.position, barrelObj.transform.rotation, _playerId);
@@ -37,10 +37,34 @@ public class TankController : NetworkBehaviour, INetworkInput
 
     public override void FixedUpdateNetwork()
     {
-        var vector = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
-        vector.Normalize();
+        // var vector = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
+        // vector.Normalize();
+        // TankMove(vector);
+        // RotateBarrel();
+        if (GetInput<MyInput>(out var input) == false) return;
+
+        // compute pressed/released state
+        var pressed = input.Buttons.GetPressed(InputPrevious);
+        var released = input.Buttons.GetReleased(InputPrevious);
+
+        // store latest input as 'previous' state we had
+        InputPrevious = input.Buttons;
+
+        // movement (check for down)
+        var vector = default(Vector3);
+
+        if (input.Buttons.IsSet(MyButtons.Forward)) { vector.y += 1; }
+        if (input.Buttons.IsSet(MyButtons.Backward)) { vector.y -= 1; }
+
+        if (input.Buttons.IsSet(MyButtons.Left)) { vector.x  -= 1; }
+        if (input.Buttons.IsSet(MyButtons.Right)) { vector.x += 1; }
+
         TankMove(vector);
-        RotateBarrel();
+
+        // jump (check for pressed)
+        if (pressed.IsSet(MyButtons.Jump)) {
+            //DoJump();
+        }
     }
 
     void TankMove(Vector3 vector)
@@ -66,8 +90,8 @@ public class TankController : NetworkBehaviour, INetworkInput
     private void Shot(Vector3 instancePosition,Quaternion direction, int shooterId)
     {
         Debug.Log($"ID: {shooterId}");
-        var tmp = _runner.Spawn(bulletPrefab, instancePosition, direction);
-        tmp.GetComponent<Bullet>().SetShooterId(shooterId);
+        //var tmp = _networkRunner.Spawn(bulletPrefab, instancePosition, direction);
+        //tmp.GetComponent<Bullet>().SetShooterId(shooterId);
     }
 
     public void TakeDamage(int damage) { _health -= damage; }
