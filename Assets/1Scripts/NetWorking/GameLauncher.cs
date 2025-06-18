@@ -8,8 +8,8 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkRunner networkRunnerPrefab;
     [SerializeField] private NetworkPrefabRef playerAvatarPrefab;
+    [SerializeField] private GameObject inGameManagerPrefab;
     private NetworkRunner _networkRunner;
-    //[SerializeField] private InputProvider inputProviderPrefab;
 
     private async void Start()
     {
@@ -21,6 +21,9 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
         var result = await _networkRunner.StartGame(new StartGameArgs { GameMode = GameMode.Shared });
         // 結果をコンソールに出力する
         Debug.Log(result);
+
+        GameObject manager = Instantiate(inGameManagerPrefab);
+        manager.GetComponent<InGameManager>().SetRunner(_networkRunner);
     }
     void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player) {
         // セッションへ参加したプレイヤーが自分自身かどうかを判定する
@@ -29,10 +32,10 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
             var rand = UnityEngine.Random.insideUnitCircle * 5f;
             var spawnPosition = new Vector3(rand.x, 2f, rand.y);
             // 自分自身のアバターをスポーンする
-            runner.Spawn(playerAvatarPrefab, spawnPosition, Quaternion.identity, onBeforeSpawned: (_, networkObject) => {
+            var playerAvater = runner.Spawn(playerAvatarPrefab, spawnPosition, Quaternion.identity, onBeforeSpawned: (_, networkObject) => {
                 // プレイヤー名のネットワークプロパティの初期値として、ランダムな名前を設定する
-                networkObject.GetComponent<TestPlayer>().NickName = $"Player{UnityEngine.Random.Range(0, 10000)}";
-            }, inputAuthority:player);
+                networkObject.GetComponent<TankController>().NickName = $"Player{UnityEngine.Random.Range(0, 10000)}";
+            });
             //runner.SetPlayerObject(player, playerAvatar);
             //runner.AddCallbacks(Instantiate(inputProviderPrefab));
         }

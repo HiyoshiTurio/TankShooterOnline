@@ -7,8 +7,8 @@ public class TankController : NetworkBehaviour, INetworkInput
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float moveSpeed = 3f;
     [Networked] public NetworkString<_16> NickName { get; set; }
-    [Networked] public NetworkButtons ButtonsPrevious { get; set; }
     private PlayerView _playerView;
+    private NetworkRunner _runner;
     //private Animator _animator;
     private int _playerId = -1;
     private int _health = 100;
@@ -17,49 +17,32 @@ public class TankController : NetworkBehaviour, INetworkInput
     public override void Spawned()
     {
         //_animator = GetComponent<Animator>();
-        //_playerId = InGameManager.Instance.GetPlayerId();
         _playerView = GetComponent<PlayerView>();
         _playerView.SetNickName(NickName.Value);
+        _runner = InGameManager.Instance.Runner;
     }
 
-    public override void FixedUpdateNetwork()
+    void Update()
     {
-        if (GetInput<MyInput>(out var input) == false)
-        {
-            Debug.Log("No input");
-            return;
-        };
-        
-        // compute pressed/released state
-        var pressed = input.Buttons.GetPressed(ButtonsPrevious);
-        var released = input.Buttons.GetReleased(ButtonsPrevious);
-
-        // store latest input as 'previous' state we had
-        ButtonsPrevious = input.Buttons;
-
-        // movement (check for down)
-        var vector = default(Vector3);
-
-        if (input.Buttons.IsSet(MyButtons.Forward)) { vector.y += 1; }
-        if (input.Buttons.IsSet(MyButtons.Backward)) { vector.y -= 1; }
-
-        if (input.Buttons.IsSet(MyButtons.Left)) { vector.x  -= 1; }
-        if (input.Buttons.IsSet(MyButtons.Right)) { vector.x += 1; }
-
-        TankMove(vector);
-
-        // jump (check for pressed)
-        if (pressed.IsSet(MyButtons.Jump)) {
+        if (Input.GetButton("Jump")) {
             //DoJump();
             Debug.Log("Jump");
         }
 
-        if (pressed.IsSet(MyButtons.Attack))
+        if (Input.GetButtonDown("Fire1"))
         {
-            Debug.Log("Attack");
             Shot(barrelObj.transform.position, barrelObj.transform.rotation, _playerId);
         }
     }
+
+    public override void FixedUpdateNetwork()
+    {
+        var vector = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
+        vector.Normalize();
+        TankMove(vector);
+        RotateBarrel();
+    }
+
     void TankMove(Vector3 vector)
     {
         float h = vector.x;
@@ -82,14 +65,13 @@ public class TankController : NetworkBehaviour, INetworkInput
 
     private void Shot(Vector3 instancePosition,Quaternion direction, int shooterId)
     {
-        GameObject bullet = Instantiate(bulletPrefab, instancePosition, direction);
-        bullet.GetComponent<Bullet>().SetShooterId(shooterId);
+        Debug.Log($"ID: {shooterId}");
+        var tmp = _runner.Spawn(bulletPrefab, instancePosition, direction);
+        tmp.GetComponent<Bullet>().SetShooterId(shooterId);
     }
 
-    public void TakeDamage(int damage)
-    {
-        _health -= damage;
-    }
+    public void TakeDamage(int damage) { _health -= damage; }
+    public void SetPlayerId(int playerId) { _playerId = playerId; }
 }
 
 public struct MyInput : INetworkInput
