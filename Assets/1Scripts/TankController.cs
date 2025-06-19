@@ -18,7 +18,7 @@ public class TankController : NetworkBehaviour, INetworkInput
     public override void Spawned()
     {
         _playerView = GetComponent<PlayerView>();
-        _playerView.playerTransform = transform;
+        _playerView.SetTransform(transform);
         _playerView.SetNickName(NickName.Value);
         
         if (Object.HasInputAuthority)
@@ -50,10 +50,6 @@ public class TankController : NetworkBehaviour, INetworkInput
 
     public override void FixedUpdateNetwork()
     {
-        // var vector = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
-        // vector.Normalize();
-        // TankMove(vector);
-        // RotateBarrel();
         if (GetInput<PlayerInput>(out var input) == false) return;
 
         // compute pressed/released state
@@ -85,7 +81,8 @@ public class TankController : NetworkBehaviour, INetworkInput
         float h = vector.x;
         float v = vector.y;
         Vector3 vec = new Vector3(h, v, 0).normalized;
-        transform.position += vec * moveSpeed / 60;
+        transform.position += vec * moveSpeed * Runner.DeltaTime;
+        
         if (h > 0.1 || v > 0.1 || h < -0.1 || v < -0.1)
         {
             float angle = Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg;
