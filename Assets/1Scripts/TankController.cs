@@ -6,21 +6,34 @@ public class TankController : NetworkBehaviour, INetworkInput
     [SerializeField] private GameObject barrelObj;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float moveSpeed = 3f;
-    [Networked] public NetworkString<_16> NickName { get; set; }
+    
+    [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
+    public NetworkString<_16> NickName { get; set; }
     [Networked] public NetworkButtons InputPrevious { get; set; }
     private PlayerView _playerView;
-    //private NetworkRunner _networkRunner;
-    //private Animator _animator;
     private int _playerId = -1;
     private int _health = 100;
     public int PlayerId => _playerId;
 
     public override void Spawned()
     {
-        //_animator = GetComponent<Animator>();
         _playerView = GetComponent<PlayerView>();
+        _playerView.playerTransform = transform;
         _playerView.SetNickName(NickName.Value);
-        //_networkRunner = InGameManager.Instance.Runner;
+        
+        if (Object.HasInputAuthority)
+        {
+            // RPCでプレイヤー名を設定する処理をホストに実行してもらう
+            Rpc_SetNickName(PlayerData.NickName);
+        }
+    }
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void Rpc_SetNickName(string nickName) {
+        NickName = nickName;
+    }
+    public void OnNickNameChanged() {
+        // 更新されたプレイヤー名をテキストに反映する
+        _playerView.SetNickName(NickName.Value);
     }
 
     void Update()
@@ -41,7 +54,7 @@ public class TankController : NetworkBehaviour, INetworkInput
         // vector.Normalize();
         // TankMove(vector);
         // RotateBarrel();
-        if (GetInput<MyInput>(out var input) == false) return;
+        if (GetInput<PlayerInput>(out var input) == false) return;
 
         // compute pressed/released state
         var pressed = input.Buttons.GetPressed(InputPrevious);
@@ -60,10 +73,10 @@ public class TankController : NetworkBehaviour, INetworkInput
         if (input.Buttons.IsSet(MyButtons.Right)) { vector.x += 1; }
 
         TankMove(vector);
+        RotateBarrel(barrelObj, input.MousePos);
 
         // jump (check for pressed)
         if (pressed.IsSet(MyButtons.Jump)) {
-            //DoJump();
         }
     }
 
@@ -80,11 +93,11 @@ public class TankController : NetworkBehaviour, INetworkInput
         }
     }
 
-    private void RotateBarrel()
+    private void RotateBarrel(GameObject rotationObj, Vector3 mousePos)
     {
-        Vector2 tmp = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+        Vector2 tmp = Camera.main.ScreenToWorldPoint(mousePos) - transform.position;
         float angle = Mathf.Atan2(tmp.y, tmp.x) * Mathf.Rad2Deg;
-        barrelObj.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        rotationObj.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
     private void Shot(Vector3 instancePosition,Quaternion direction, int shooterId)
@@ -97,19 +110,10 @@ public class TankController : NetworkBehaviour, INetworkInput
     public void TakeDamage(int damage) { _health -= damage; }
     public void SetPlayerId(int playerId) { _playerId = playerId; }
 }
-
-public struct MyInput : INetworkInput
+public static class PlayerData
 {
-    public NetworkButtons Buttons;
-    //public Vector3 AimDirection;
-}
-
-enum MyButtons
-{
-    Forward = 0,
-    Backward = 1,
-    Left = 2,
-    Right = 3,
-    Jump = 4,
-    Attack = 5,
+    public static string NickName {
+        get => PlayerPrefs.GetString("NickName", "No Name");
+        set => PlayerPrefs.SetString("NickName", value);
+    }
 }

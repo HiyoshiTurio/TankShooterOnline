@@ -13,6 +13,9 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
     private async void Start() 
     {
+        // ランダムなプレイヤー名を設定する
+        PlayerData.NickName = $"Player{UnityEngine.Random.Range(0, 10000)}";
+        
         // NetworkRunnerを生成する
         _networkRunner = Instantiate(networkRunnerPrefab);
         _networkRunner.AddCallbacks(this);
@@ -29,8 +32,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
             Debug.Log("失敗！");
     }
     // セッションへプレイヤーが参加した時に呼ばれるコールバック
-    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) 
-    {
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) {
         // ホスト（サーバー兼クライアント）かどうかはIsServerで判定できる
         if (!runner.IsServer) { return; }
         // ランダムな生成位置（半径5の円の内部）を取得する
@@ -41,6 +43,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
         // プレイヤー（PlayerRef）とアバター（NetworkObject）を関連付ける
         runner.SetPlayerObject(player, avatar);
     }
+
     // セッションからプレイヤーが退出した時に呼ばれるコールバック
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {

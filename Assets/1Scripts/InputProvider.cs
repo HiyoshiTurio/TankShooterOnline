@@ -8,32 +8,33 @@ public class InputProvider : SimulationBehaviour, INetworkRunnerCallbacks
 {
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        MyInput myInput = new MyInput();
+        PlayerInput playerInput = new PlayerInput();
         if (Input.GetMouseButton(0)) 
         {
-            myInput.Buttons.Set(MyButtons.Attack, true);
+            playerInput.Buttons.Set(MyButtons.Attack, true);
         }
         if (Input.GetKey(KeyCode.Space)) 
         {
-            myInput.Buttons.Set(MyButtons.Jump, true);
+            playerInput.Buttons.Set(MyButtons.Jump, true);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            myInput.Buttons.Set(MyButtons.Left, true);
+            playerInput.Buttons.Set(MyButtons.Left, true);
         }
         if (Input.GetKey(KeyCode.D))
         {
-            myInput.Buttons.Set(MyButtons.Right, true);
+            playerInput.Buttons.Set(MyButtons.Right, true);
         }
         if (Input.GetKey(KeyCode.W))
         {
-            myInput.Buttons.Set(MyButtons.Forward, true);
+            playerInput.Buttons.Set(MyButtons.Forward, true);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            myInput.Buttons.Set(MyButtons.Backward, true);
+            playerInput.Buttons.Set(MyButtons.Backward, true);
         }
-        Debug.Log("Sending input : "+ input.Set(myInput));
+        playerInput.MousePos = Input.mousePosition;
+        Debug.Log("Sending input : "+ input.Set(playerInput));
         // Reset the input struct to start with a clean slate
         // when polling for the next tick
     }
@@ -56,4 +57,19 @@ public class InputProvider : SimulationBehaviour, INetworkRunnerCallbacks
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     public void OnSceneLoadDone(NetworkRunner runner) { }
     public void OnSceneLoadStart(NetworkRunner runner) { }
+}
+public struct PlayerInput : INetworkInput
+{
+    public NetworkButtons Buttons;
+    public Vector3 MousePos;
+}
+
+enum MyButtons
+{
+    Forward = 0,
+    Backward = 1,
+    Left = 2,
+    Right = 3,
+    Jump = 4,
+    Attack = 5,
 }
