@@ -10,6 +10,8 @@ public class TankController : NetworkBehaviour, INetworkInput
     [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
     [field: System.NonSerialized] //[field: System.NonSerialized]を使うことでInspector上にNickName変数を表示しないようにしている
     public NetworkString<_16> NickName { get; set; }
+
+    private int frame = 0;
     [Networked] public NetworkButtons InputPrevious { get; set; }
     private PlayerView _playerView;
     private int _playerId = -1;
@@ -57,6 +59,7 @@ public class TankController : NetworkBehaviour, INetworkInput
         // jump (check for pressed)
         if (pressed.IsSet(MyButtons.Jump)) {
         }
+        Debug.Log($"Frame : {frame++}");
     }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void Rpc_SetNickName(string nickName) {
@@ -72,7 +75,7 @@ public class TankController : NetworkBehaviour, INetworkInput
         float h = vector.x;
         float v = vector.y;
         Vector3 vec = new Vector3(h, v, 0).normalized;
-        transform.position += vec * moveSpeed * Runner.DeltaTime;
+        transform.position += moveSpeed * vec * Runner.DeltaTime;
         
         if (h > 0.1 || v > 0.1 || h < -0.1 || v < -0.1)
         {

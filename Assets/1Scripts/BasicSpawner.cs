@@ -10,7 +10,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private NetworkPrefabRef playerPrefab;
     private NetworkRunner _runner;
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
-
+    private NetworkCharacterController _cc;
     async void StartGame(GameMode mode)
     {
         // Create the Fusion runner and let it know that we will be providing user input
@@ -74,33 +74,33 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        // PlayerInput playerInput = new PlayerInput();
-        // if (Input.GetMouseButton(0)) 
-        // {
-        //     playerInput.Buttons.Set(MyButtons.Attack, true);
-        // }
-        // if (Input.GetKey(KeyCode.Space)) 
-        // {
-        //     playerInput.Buttons.Set(MyButtons.Jump, true);
-        // }
-        // if (Input.GetKey(KeyCode.A))
-        // {
-        //     playerInput.Buttons.Set(MyButtons.Left, true);
-        // }
-        // if (Input.GetKey(KeyCode.D))
-        // {
-        //     playerInput.Buttons.Set(MyButtons.Right, true);
-        // }
-        // if (Input.GetKey(KeyCode.W))
-        // {
-        //     playerInput.Buttons.Set(MyButtons.Forward, true);
-        // }
-        // if (Input.GetKey(KeyCode.S))
-        // {
-        //     playerInput.Buttons.Set(MyButtons.Backward, true);
-        // }
-        // playerInput.MousePos = Input.mousePosition;
-        // Debug.Log("Sending input : "+ input.Set(playerInput));
+        PlayerInput playerInput = new PlayerInput();
+        if (Input.GetMouseButton(0)) 
+        {
+            playerInput.Buttons.Set(MyButtons.Attack, true);
+        }
+        if (Input.GetKey(KeyCode.Space)) 
+        {
+            playerInput.Buttons.Set(MyButtons.Jump, true);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            playerInput.Buttons.Set(MyButtons.Left, true);
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            playerInput.Buttons.Set(MyButtons.Right, true);
+        }
+        if (Input.GetKey(KeyCode.W))
+        {
+            playerInput.Buttons.Set(MyButtons.Forward, true);
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            playerInput.Buttons.Set(MyButtons.Backward, true);
+        }
+        playerInput.MousePos = Input.mousePosition;
+        Debug.Log("Sending input : "+ input.Set(playerInput));
     }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
