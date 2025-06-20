@@ -13,7 +13,6 @@ public class InGameManager : MonoBehaviour
         if (_instance!= null && _instance!= this) Destroy(gameObject);
         else _instance = this;
     }
-    public int GetPlayerId() { return _playerId++; }
 
     public void SetRunner(NetworkRunner runner)
     {

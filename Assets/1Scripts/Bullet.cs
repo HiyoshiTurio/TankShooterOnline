@@ -3,16 +3,25 @@ using UnityEngine;
 
 public class Bullet : NetworkBehaviour
 {
-    [SerializeField] private float speed = 10f;
+    [SerializeField,Header("弾の速度")] private float speed = 10f;
+    [Networked] private TickTimer LifeTimer { get; set; }
     private int _damage = 1;
     private int _shooterId = -1;
     public override void Spawned()
     {
         Destroy(gameObject, 5f);
     }
-    void FixedUpdate()
+    public override void FixedUpdateNetwork()
     {
-        transform.position += transform.right * speed / 60;
+        if(LifeTimer.Expired(Runner))
+            Runner.Despawn(Object);
+        else
+            transform.position += transform.right * speed * Runner.DeltaTime;
+    }
+
+    public void Init()
+    {
+        LifeTimer = TickTimer.CreateFromSeconds(Runner, 5.0f);
     }
 
     void OnTriggerEnter2D(Collider2D other)

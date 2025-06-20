@@ -35,13 +35,16 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     }
     private void OnGUI()
     {
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 100;
+        style.normal.background = Texture2D.grayTexture;
         if (_runner == null)
         {
-            if (GUI.Button(new Rect(0,0,200,40), "Host"))
+            if (GUI.Button(new Rect(0,0,300,120), "Host", style))
             {
                 StartGame(GameMode.Host);
             }
-            if (GUI.Button(new Rect(0,40,200,40), "Join"))
+            if (GUI.Button(new Rect(0,121,300,120), "Join", style))
             {
                 StartGame(GameMode.Client);
             }
@@ -71,33 +74,33 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        PlayerInput playerInput = new PlayerInput();
-        if (Input.GetMouseButton(0)) 
-        {
-            playerInput.Buttons.Set(MyButtons.Attack, true);
-        }
-        if (Input.GetKey(KeyCode.Space)) 
-        {
-            playerInput.Buttons.Set(MyButtons.Jump, true);
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            playerInput.Buttons.Set(MyButtons.Left, true);
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            playerInput.Buttons.Set(MyButtons.Right, true);
-        }
-        if (Input.GetKey(KeyCode.W))
-        {
-            playerInput.Buttons.Set(MyButtons.Forward, true);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            playerInput.Buttons.Set(MyButtons.Backward, true);
-        }
-        playerInput.MousePos = Input.mousePosition;
-        Debug.Log("Sending input : "+ input.Set(playerInput));
+        // PlayerInput playerInput = new PlayerInput();
+        // if (Input.GetMouseButton(0)) 
+        // {
+        //     playerInput.Buttons.Set(MyButtons.Attack, true);
+        // }
+        // if (Input.GetKey(KeyCode.Space)) 
+        // {
+        //     playerInput.Buttons.Set(MyButtons.Jump, true);
+        // }
+        // if (Input.GetKey(KeyCode.A))
+        // {
+        //     playerInput.Buttons.Set(MyButtons.Left, true);
+        // }
+        // if (Input.GetKey(KeyCode.D))
+        // {
+        //     playerInput.Buttons.Set(MyButtons.Right, true);
+        // }
+        // if (Input.GetKey(KeyCode.W))
+        // {
+        //     playerInput.Buttons.Set(MyButtons.Forward, true);
+        // }
+        // if (Input.GetKey(KeyCode.S))
+        // {
+        //     playerInput.Buttons.Set(MyButtons.Backward, true);
+        // }
+        // playerInput.MousePos = Input.mousePosition;
+        // Debug.Log("Sending input : "+ input.Set(playerInput));
     }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }

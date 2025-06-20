@@ -1,3 +1,4 @@
+using System;
 using Fusion;
 using UnityEngine;
 
@@ -5,9 +6,9 @@ public class TankController : NetworkBehaviour, INetworkInput
 {
     [SerializeField] private GameObject barrelObj;
     [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private float moveSpeed = 3f;
-    
+    [SerializeField,Header("移動速度")] private float moveSpeed = 3f;
     [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
+    [field: System.NonSerialized] //[field: System.NonSerialized]を使うことでInspector上にNickName変数を表示しないようにしている
     public NetworkString<_16> NickName { get; set; }
     [Networked] public NetworkButtons InputPrevious { get; set; }
     private PlayerView _playerView;
@@ -27,27 +28,6 @@ public class TankController : NetworkBehaviour, INetworkInput
             Rpc_SetNickName(PlayerData.NickName);
         }
     }
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void Rpc_SetNickName(string nickName) {
-        NickName = nickName;
-    }
-    public void OnNickNameChanged() {
-        // 更新されたプレイヤー名をテキストに反映する
-        _playerView.SetNickName(NickName.Value);
-    }
-
-    void Update()
-    {
-        if (Input.GetButton("Jump")) {
-            //DoJump();
-            Debug.Log("Jump");
-        }
-        if (Input.GetButtonDown("Fire1"))
-        {
-            Shot(barrelObj.transform.position, barrelObj.transform.rotation, _playerId);
-        }
-    }
-
     public override void FixedUpdateNetwork()
     {
         if (GetInput<PlayerInput>(out var input) == false) return;
@@ -71,9 +51,20 @@ public class TankController : NetworkBehaviour, INetworkInput
         TankMove(vector);
         RotateBarrel(barrelObj, input.MousePos);
 
+        if (pressed.IsSet(MyButtons.Attack))
+            Shot(barrelObj.transform.position, barrelObj.transform.rotation, _playerId);
+        
         // jump (check for pressed)
         if (pressed.IsSet(MyButtons.Jump)) {
         }
+    }
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void Rpc_SetNickName(string nickName) {
+        NickName = nickName;
+    }
+    public void OnNickNameChanged() {
+        // 更新されたプレイヤー名をテキストに反映する
+        _playerView.SetNickName(NickName.Value);
     }
 
     void TankMove(Vector3 vector)
@@ -100,8 +91,9 @@ public class TankController : NetworkBehaviour, INetworkInput
     private void Shot(Vector3 instancePosition,Quaternion direction, int shooterId)
     {
         Debug.Log($"ID: {shooterId}");
-        //var tmp = _networkRunner.Spawn(bulletPrefab, instancePosition, direction);
-        //tmp.GetComponent<Bullet>().SetShooterId(shooterId);
+        var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction,Object.InputAuthority,
+            (runner, o) =>{o.GetComponent<Bullet>().Init();});
+        tmp.GetComponent<Bullet>().SetShooterId(shooterId);
     }
 
     public void TakeDamage(int damage) { _health -= damage; }

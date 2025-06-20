@@ -7,8 +7,8 @@ using UnityEngine;
 public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkRunner networkRunnerPrefab;
-    [SerializeField] private NetworkPrefabRef playerAvatarPrefab;
     [SerializeField] private GameObject inGameManagerPrefab;
+    [SerializeField, Header("プレイヤーのプレハブ")] private NetworkPrefabRef playerAvatarPrefab;
     private NetworkRunner _networkRunner;
 
     private async void Start() 
