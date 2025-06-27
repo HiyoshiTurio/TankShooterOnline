@@ -19,7 +19,7 @@ public class Bullet : NetworkBehaviour
 
     public void Init()
     {
-        LifeTimer = TickTimer.CreateFromSeconds(Runner, 2.0f);
+        LifeTimer = TickTimer.CreateFromSeconds(Runner, 1.0f);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

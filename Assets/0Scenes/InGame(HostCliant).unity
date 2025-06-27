@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14a5e32d9fed5e74b8bbfc2404c9e990, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  smokeEffectPrefab: {fileID: 1650296332991146515, guid: 3b03022206c1aa54083bb675c659d865, type: 3}
+  smokeEffectPrefab: {fileID: 4534532937671008787, guid: 649a1ce8f7028e4418bb77d8bb238c94, type: 3}
 --- !u!4 &973369128
 Transform:
   m_ObjectHideFlags: 0
