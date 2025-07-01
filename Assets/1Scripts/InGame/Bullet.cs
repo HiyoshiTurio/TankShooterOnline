@@ -1,10 +1,10 @@
-using System;
 using Fusion;
 using UnityEngine;
 
 public class Bullet : NetworkBehaviour
 {
     [SerializeField,Header("弾の速度")] private float speed = 10f;
+    [SerializeField,Header("弾の消滅までの時間")] private float lifeTime = 1.0f;
     [Networked] private TickTimer LifeTimer { get; set; }
     private int _damage = 1;
     private int _shooterId = -1;
@@ -19,7 +19,7 @@ public class Bullet : NetworkBehaviour
 
     public void Init()
     {
-        LifeTimer = TickTimer.CreateFromSeconds(Runner, 1.0f);
+        LifeTimer = TickTimer.CreateFromSeconds(Runner, lifeTime);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

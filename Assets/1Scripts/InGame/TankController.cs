@@ -10,8 +10,8 @@ public class TankController : NetworkBehaviour, INetworkInput
     [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
     [field: System.NonSerialized] //[field: System.NonSerialized]を使うことでInspector上にNickName変数を表示しないようにしている
     public NetworkString<_16> NickName { get; set; }
-
     [Networked] public NetworkButtons InputPrevious { get; set; }
+    private WeaponManager _weaponManager;
     private PlayerView _playerView;
     private int _playerId = -1;
     private int _health = 100;
@@ -28,6 +28,8 @@ public class TankController : NetworkBehaviour, INetworkInput
             // RPCでプレイヤー名を設定する処理をホストに実行してもらう
             Rpc_SetNickName(PlayerData.NickName);
         }
+
+        _weaponManager = WeaponManager.Instance;
     }
     public override void FixedUpdateNetwork()
     {
@@ -88,13 +90,17 @@ public class TankController : NetworkBehaviour, INetworkInput
         float angle = Mathf.Atan2(tmp.y, tmp.x) * Mathf.Rad2Deg;
         rotationObj.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
-
-    private void Shot(Vector3 instancePosition,Quaternion direction, int shooterId)
+    
+    // private void Shot(Vector3 instancePosition,Quaternion direction, int shooterId)
+    // {
+    //     Debug.Log($"ID: {shooterId}");
+    //     var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction,Object.InputAuthority,
+    //         (runner, o) =>{o.GetComponent<Bullet>().Init();});
+    //     tmp.GetComponent<Bullet>().SetShooterId(shooterId);
+    // }
+    private void Shot(Vector3 instancePosition, Quaternion direction, int shooterId)
     {
         Debug.Log($"ID: {shooterId}");
-        var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction,Object.InputAuthority,
-            (runner, o) =>{o.GetComponent<Bullet>().Init();});
-        tmp.GetComponent<Bullet>().SetShooterId(shooterId);
     }
 
     public void TakeDamage(int damage) { _health -= damage; }
