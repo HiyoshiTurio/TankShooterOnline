@@ -19,13 +19,17 @@ public class WeaponManager : NetworkBehaviour
     //     tmp.GetComponent<Bullet>().SetShooterId(shooterId);
     // }
     
-    public void RPC_SendFire(Vector3 instancePosition, Quaternion direction, int shooterId)
-    {
-        
-    }
-
-    public void RPC_RelayFire(Vector3 instancePosition, Quaternion direction, int shooterId)
-    {
-        
-    }
+    // [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    // public void RPC_SendFire(Vector3 instancePosition, Quaternion direction, int shooterId)
+    // {
+    //     RPC_RelayFire(instancePosition, direction, shooterId);
+    // }
+    //
+    // [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    // private void RPC_RelayFire(Vector3 instancePosition, Quaternion direction, int shooterId)
+    // {
+    //     var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
+    //              (runner, o) => { o.GetComponent<Bullet>().Init(); });
+    //          tmp.GetComponent<Bullet>().SetShooterId(shooterId);
+    // }
 }
