@@ -55,12 +55,7 @@ public class TankController : NetworkBehaviour, INetworkInput
         RotateBarrel(barrelObj, input.MousePos);
 
         if (pressed.IsSet(MyButtons.Attack))
-            //if (Object.HasInputAuthority)
-            {
-                Debug.Log("A");
-                Shot(bulletInstancePos.transform.position,barrelObj.transform.rotation);
-                //RPC_SendFire( bulletInstancePos.transform.position, barrelObj.transform.rotation);
-            }
+            Shot(bulletInstancePos.transform.position,barrelObj.transform.rotation);
         
         // jump (check for pressed)
         if (pressed.IsSet(MyButtons.Jump)) {
@@ -74,24 +69,6 @@ public class TankController : NetworkBehaviour, INetworkInput
                 (runner, o) => { o.GetComponent<Bullet>().Init(); });
         }
     }
-    //[Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
-    // public void RPC_SendFire(Vector3 instancePosition, Quaternion direction, RpcInfo info = default)
-    // {
-    //     if (HasStateAuthority)
-    //     {
-    //         Debug.Log("B");
-    //         RPC_RelayFire(instancePosition, direction, info.Source);
-    //     }
-    // }
-    //
-    // [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
-    // private void RPC_RelayFire(Vector3 instancePosition, Quaternion direction,PlayerRef playerRef)
-    // {
-    //     Debug.Log("C");
-    //     var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
-    //         (runner, o) => { o.GetComponent<Bullet>().Init(); });
-    //     //tmp.GetComponent<Bullet>().SetShooterId(shooterId);
-    // }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void Rpc_SetNickName(string nickName) {
         NickName = nickName;
