@@ -52,7 +52,6 @@ public class EffectManager : MonoBehaviour
         }
         obj.SetActive(true);
         obj.transform.SetParent(_activeEffectPool.transform);
-        Debug.Log(obj.name);
         return obj;
     }
 

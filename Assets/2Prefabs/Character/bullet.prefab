@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5528442077483645835}
   - component: {fileID: 7091539897321298880}
   - component: {fileID: 2986839861211287513}
-  - component: {fileID: -2985411988319765377}
+  - component: {fileID: -1656062917472176611}
   m_Layer: 0
   m_Name: bullet
   m_TagString: Untagged
@@ -105,6 +105,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
+  lifeTime: 1
 --- !u!114 &5528442077483645835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,7 +124,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 807911366490868258}
-  - {fileID: -2985411988319765377}
+  - {fileID: -1656062917472176611}
   ForceRemoteRenderTimeframe: 0
 --- !u!61 &7091539897321298880
 BoxCollider2D:
@@ -198,7 +199,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &-2985411988319765377
+--- !u!114 &-1656062917472176611
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -4,7 +4,7 @@ using UnityEngine;
 public class TankController : NetworkBehaviour, INetworkInput
 {
     [SerializeField] private GameObject barrelObj;
-    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private GameObject bulletInstancePos;
     [SerializeField,Header("移動速度")] private float moveSpeed = 3f;
     [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
@@ -55,14 +55,43 @@ public class TankController : NetworkBehaviour, INetworkInput
         RotateBarrel(barrelObj, input.MousePos);
 
         if (pressed.IsSet(MyButtons.Attack))
-            //Shot(bulletInstancePos.transform.position, barrelObj.transform.rotation, _playerId);
-            if(Object.HasInputAuthority)
-                RPC_SendFire( bulletInstancePos.transform.position, barrelObj.transform.rotation);
+            //if (Object.HasInputAuthority)
+            {
+                Debug.Log("A");
+                Shot(bulletInstancePos.transform.position,barrelObj.transform.rotation);
+                //RPC_SendFire( bulletInstancePos.transform.position, barrelObj.transform.rotation);
+            }
         
         // jump (check for pressed)
         if (pressed.IsSet(MyButtons.Jump)) {
         }
     }
+    void Shot(Vector3 instancePosition, Quaternion direction)
+    {
+        if (HasStateAuthority)
+        {
+            var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
+                (runner, o) => { o.GetComponent<Bullet>().Init(); });
+        }
+    }
+    //[Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
+    // public void RPC_SendFire(Vector3 instancePosition, Quaternion direction, RpcInfo info = default)
+    // {
+    //     if (HasStateAuthority)
+    //     {
+    //         Debug.Log("B");
+    //         RPC_RelayFire(instancePosition, direction, info.Source);
+    //     }
+    // }
+    //
+    // [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    // private void RPC_RelayFire(Vector3 instancePosition, Quaternion direction,PlayerRef playerRef)
+    // {
+    //     Debug.Log("C");
+    //     var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
+    //         (runner, o) => { o.GetComponent<Bullet>().Init(); });
+    //     //tmp.GetComponent<Bullet>().SetShooterId(shooterId);
+    // }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void Rpc_SetNickName(string nickName) {
         NickName = nickName;
@@ -93,26 +122,6 @@ public class TankController : NetworkBehaviour, INetworkInput
         rotationObj.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
     
-    // private void Shot(Vector3 instancePosition,Quaternion direction, int shooterId)
-    // {
-    //     Debug.Log($"ID: {shooterId}");
-    //     var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction,Object.InputAuthority,
-    //         (runner, o) =>{o.GetComponent<Bullet>().Init();});
-    //     tmp.GetComponent<Bullet>().SetShooterId(shooterId);
-    // }
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
-    public void RPC_SendFire(Vector3 instancePosition, Quaternion direction, RpcInfo info = default)
-    {
-            RPC_RelayFire(instancePosition, direction, info.Source);
-    }
-    
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
-    private void RPC_RelayFire(Vector3 instancePosition, Quaternion direction,PlayerRef playerRef)
-    {
-        var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
-            (runner, o) => { o.GetComponent<Bullet>().Init(); });
-        //tmp.GetComponent<Bullet>().SetShooterId(shooterId);
-    }
 
     public void TakeDamage(int damage) { _health -= damage; }
     public void SetPlayerId(int playerId) { _playerId = playerId; }

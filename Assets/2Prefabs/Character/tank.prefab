@@ -300,7 +300,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   barrelObj: {fileID: 3672781674663895673}
-  bulletPrefab: {fileID: 2501669920123853025, guid: 518cdf28570f48a4c9e7f78539e96cea, type: 3}
+  bulletPrefab: {fileID: 807911366490868258, guid: 518cdf28570f48a4c9e7f78539e96cea, type: 3}
   bulletInstancePos: {fileID: 3042436779231252328}
   moveSpeed: 3
 --- !u!114 &1528582610422498552
