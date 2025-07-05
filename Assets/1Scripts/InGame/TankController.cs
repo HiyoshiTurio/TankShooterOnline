@@ -7,10 +7,12 @@ public class TankController : NetworkBehaviour, INetworkInput
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private GameObject bulletInstancePos;
     [SerializeField,Header("移動速度")] private float moveSpeed = 3f;
+    [SerializeField] BulletContainer bulletContainer;
     [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
     [field: System.NonSerialized] //[field: System.NonSerialized]を使うことでInspector上にNickName変数を表示しないようにしている
     public NetworkString<_16> NickName { get; set; }
     [Networked] public NetworkButtons InputPrevious { get; set; }
+    [Networked] private TickTimer Delay { get; set; }
     private WeaponManager _weaponManager;
     private PlayerView _playerView;
     private int _playerId = -1;
@@ -30,6 +32,7 @@ public class TankController : NetworkBehaviour, INetworkInput
         }
 
         _weaponManager = WeaponManager.Instance;
+        bulletContainer = BulletContainer.Instance;
     }
     public override void FixedUpdateNetwork()
     {
@@ -55,16 +58,24 @@ public class TankController : NetworkBehaviour, INetworkInput
         RotateBarrel(barrelObj, input.MousePos);
 
         if (pressed.IsSet(MyButtons.Attack))
-            Shot(bulletInstancePos.transform.position,barrelObj.transform.rotation);
+            Rpc_Shot2(bulletInstancePos.transform.position,barrelObj.transform.rotation);
+            //Shot(bulletInstancePos.transform.position,barrelObj.transform.rotation);
         
         // jump (check for pressed)
         if (pressed.IsSet(MyButtons.Jump)) {
         }
     }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    void Rpc_Shot2(Vector3 instancePosition, Quaternion direction)
+    {
+        bulletContainer.InstanceBullet(instancePosition, direction);
+    }
     void Shot(Vector3 instancePosition, Quaternion direction)
     {
-        if (HasStateAuthority)
+        if (HasStateAuthority && Delay.ExpiredOrNotRunning(Runner))
         {
+            Delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
             var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
                 (runner, o) => { o.GetComponent<Bullet>().Init(); });
         }

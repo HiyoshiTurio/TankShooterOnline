@@ -1,1 +1,5 @@
+公式HP
+https://doc.photonengine.com/ja-jp/fusion/current/tutorials/host-mode-basics/overview
 https://doc.photonengine.com/ja-jp/fusion/current/manual/spawning
+弾の同期
+https://zenn.dev/o8que/articles/afe59cfb76404b
