@@ -3,12 +3,12 @@ using Fusion;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BulletContainer : SimulationBehaviour
+public class BulletContainer : NetworkBehaviour
 {
     private readonly List<BulletTest> activeBullets = new(64);
-    private readonly Stack<BulletTest> inActiveBullets = new(64);
+    private readonly Stack<BulletTest> deactiveBullets = new(64);
     [SerializeField] GameObject bulletPrefab;
-    static BulletContainer _instance;
+    private static BulletContainer _instance;
     public static BulletContainer Instance => _instance;
     
     void Awake() {
@@ -18,7 +18,7 @@ public class BulletContainer : SimulationBehaviour
         // 弾の初期化
         for (int i = 0; i < 64; i++) {
             var bullet = Instantiate(bulletPrefab, transform).GetComponent<BulletTest>();
-            inActiveBullets.Push(bullet);
+            deactiveBullets.Push(bullet);
         }
     }
     public override void FixedUpdateNetwork() {
@@ -28,23 +28,22 @@ public class BulletContainer : SimulationBehaviour
             if (!bullet.IsAlive) {
                 bullet.Deactivate();
                 activeBullets.Remove(bullet);
-                inActiveBullets.Push(bullet);
+                deactiveBullets.Push(bullet);
             }
         }
     }
-    
     public override void Render() {
-        float tick = (Runner.Tick - 1 + Runner.LocalAlpha);
+        float tick = Runner.Tick - 1 + Runner.LocalAlpha;
         // 弾の位置を更新する
         foreach (var bullet in activeBullets) {
             bullet.Render(tick, Runner.DeltaTime);
         }
     }
-    
-    public void InstanceBullet(Vector2 position, Quaternion direction)
+    public void FireBarrage(int playerId, Vector2 position, Quaternion direction, float tick)
     {
-        BulletTest bullet = inActiveBullets.Pop();
+        Debug.Log("Firing barrage");
+        BulletTest bullet = deactiveBullets.Pop();
         activeBullets.Add(bullet);
-        bullet.Init(position, direction);
+        bullet.Init(playerId,position, direction,tick);
     }
 }

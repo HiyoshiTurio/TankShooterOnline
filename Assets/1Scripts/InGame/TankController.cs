@@ -7,13 +7,12 @@ public class TankController : NetworkBehaviour, INetworkInput
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private GameObject bulletInstancePos;
     [SerializeField,Header("移動速度")] private float moveSpeed = 3f;
-    [SerializeField] BulletContainer bulletContainer;
+    private BulletContainer _bulletContainer;
     [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
     [field: System.NonSerialized] //[field: System.NonSerialized]を使うことでInspector上にNickName変数を表示しないようにしている
     public NetworkString<_16> NickName { get; set; }
     [Networked] public NetworkButtons InputPrevious { get; set; }
     [Networked] private TickTimer Delay { get; set; }
-    private WeaponManager _weaponManager;
     private PlayerView _playerView;
     private int _playerId = -1;
     private int _health = 100;
@@ -30,9 +29,7 @@ public class TankController : NetworkBehaviour, INetworkInput
             // RPCでプレイヤー名を設定する処理をホストに実行してもらう
             Rpc_SetNickName(PlayerData.NickName);
         }
-
-        _weaponManager = WeaponManager.Instance;
-        bulletContainer = BulletContainer.Instance;
+        _bulletContainer = BulletContainer.Instance;
     }
     public override void FixedUpdateNetwork()
     {
@@ -58,18 +55,22 @@ public class TankController : NetworkBehaviour, INetworkInput
         RotateBarrel(barrelObj, input.MousePos);
 
         if (pressed.IsSet(MyButtons.Attack))
-            Rpc_Shot2(bulletInstancePos.transform.position,barrelObj.transform.rotation);
+            //Rpc_Shot2(bulletInstancePos.transform.position,barrelObj.transform.rotation);
             //Shot(bulletInstancePos.transform.position,barrelObj.transform.rotation);
+            RpcFireBarrage();
         
         // jump (check for pressed)
         if (pressed.IsSet(MyButtons.Jump)) {
         }
     }
-
-    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
-    void Rpc_Shot2(Vector3 instancePosition, Quaternion direction)
-    {
-        bulletContainer.InstanceBullet(instancePosition, direction);
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, TickAligned = true)]
+    private void RpcFireBarrage(RpcInfo info = default) {
+        _bulletContainer.FireBarrage(
+            PlayerId, // プレイヤーID（誰が発射した弾か）
+            transform.position, // 発射位置（弾幕がどこから発射されるか）
+            barrelObj.transform.rotation, // 発射方向（弾幕がどの方向に発射されるか）
+            info.Tick // ティック（弾幕がいつ発射されたか）
+        );
     }
     void Shot(Vector3 instancePosition, Quaternion direction)
     {

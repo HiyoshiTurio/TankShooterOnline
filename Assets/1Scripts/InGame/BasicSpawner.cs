@@ -24,7 +24,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         // Start or join (depends on gamemode) a session with a specific name
-        await _runner.StartGame(new StartGameArgs()
+        await _runner.StartGame(new StartGameArgs
         {
             GameMode = mode,
             SessionName = "TestRoom",
