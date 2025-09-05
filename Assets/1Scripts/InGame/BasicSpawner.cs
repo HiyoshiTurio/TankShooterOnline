@@ -99,7 +99,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             playerInput.Buttons.Set(MyButtons.Backward, true);
         }
         playerInput.MousePos = Input.mousePosition;
-        Debug.Log("Sending input : "+ input.Set(playerInput));
     }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }

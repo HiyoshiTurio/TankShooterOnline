@@ -57,14 +57,14 @@ public class TankController : NetworkBehaviour, INetworkInput
         if (pressed.IsSet(MyButtons.Attack))
             //Rpc_Shot2(bulletInstancePos.transform.position,barrelObj.transform.rotation);
             //Shot(bulletInstancePos.transform.position,barrelObj.transform.rotation);
-            RpcFireBarrage();
+            Rpc_FireBarrage();
         
         // jump (check for pressed)
         if (pressed.IsSet(MyButtons.Jump)) {
         }
     }
     [Rpc(RpcSources.StateAuthority, RpcTargets.All, TickAligned = true)]
-    private void RpcFireBarrage(RpcInfo info = default) {
+    private void Rpc_FireBarrage(RpcInfo info = default) {
         _bulletContainer.FireBarrage(
             PlayerId, // プレイヤーID（誰が発射した弾か）
             transform.position, // 発射位置（弾幕がどこから発射されるか）
@@ -72,15 +72,15 @@ public class TankController : NetworkBehaviour, INetworkInput
             info.Tick // ティック（弾幕がいつ発射されたか）
         );
     }
-    void Shot(Vector3 instancePosition, Quaternion direction)
-    {
-        if (HasStateAuthority && Delay.ExpiredOrNotRunning(Runner))
-        {
-            Delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
-            var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
-                (runner, o) => { o.GetComponent<Bullet>().Init(); });
-        }
-    }
+    // void Shot(Vector3 instancePosition, Quaternion direction)
+    // {
+    //     if (HasStateAuthority && Delay.ExpiredOrNotRunning(Runner))
+    //     {
+    //         Delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
+    //         var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
+    //             (runner, o) => { o.GetComponent<Bullet>().Init(); });
+    //     }
+    // }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void Rpc_SetNickName(string nickName) {
         NickName = nickName;

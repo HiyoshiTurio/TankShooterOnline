@@ -3,10 +3,10 @@ using Fusion;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BulletContainer : NetworkBehaviour
+public class BulletContainer : SimulationBehaviour
 {
-    private readonly List<BulletTest> activeBullets = new(64);
-    private readonly Stack<BulletTest> deactiveBullets = new(64);
+    private readonly List<Bullet_Contained> activeBullets = new(64);
+    private readonly Stack<Bullet_Contained> deactiveBullets = new(64);
     [SerializeField] GameObject bulletPrefab;
     private static BulletContainer _instance;
     public static BulletContainer Instance => _instance;
@@ -17,7 +17,7 @@ public class BulletContainer : NetworkBehaviour
     void Start() {
         // 弾の初期化
         for (int i = 0; i < 64; i++) {
-            var bullet = Instantiate(bulletPrefab, transform).GetComponent<BulletTest>();
+            var bullet = Instantiate(bulletPrefab, transform).GetComponent<Bullet_Contained>();
             deactiveBullets.Push(bullet);
         }
     }
@@ -42,7 +42,7 @@ public class BulletContainer : NetworkBehaviour
     public void FireBarrage(int playerId, Vector2 position, Quaternion direction, float tick)
     {
         Debug.Log("Firing barrage");
-        BulletTest bullet = deactiveBullets.Pop();
+        Bullet_Contained bullet = deactiveBullets.Pop();
         activeBullets.Add(bullet);
         bullet.Init(playerId,position, direction,tick);
     }

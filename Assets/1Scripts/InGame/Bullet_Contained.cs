@@ -1,7 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class BulletTest : MonoBehaviour
+public class Bullet_Contained : MonoBehaviour
 {
     [SerializeField,Header("弾の速度")] private float speed = 2f;
     [SerializeField,Header("弾の消滅までの時間")] private float lifeTime = 1.0f;
