@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8371960801217837788}
   - component: {fileID: 7964980210200954669}
-  - component: {fileID: -4970945729969564352}
   m_Layer: 0
   m_Name: BulletContainer
   m_TagString: Untagged
@@ -46,21 +45,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 6349532977846404608, guid: edb38e97e18ad744a9b1b2dcc6b6e4b3, type: 3}
---- !u!114 &-4970945729969564352
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5321894602277017028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SortKey: 1024157851
-  ObjectInterest: 1
-  Flags: 786433
-  NestedObjects: []
-  NetworkedBehaviours: []
-  ForceRemoteRenderTimeframe: 0

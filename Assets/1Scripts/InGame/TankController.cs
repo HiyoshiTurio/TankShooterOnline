@@ -4,15 +4,14 @@ using UnityEngine;
 public class TankController : NetworkBehaviour, INetworkInput
 {
     [SerializeField] private GameObject barrelObj;
-    [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private GameObject bulletInstancePos;
     [SerializeField,Header("移動速度")] private float moveSpeed = 3f;
-    private BulletContainer _bulletContainer;
     [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
     [field: System.NonSerialized] //[field: System.NonSerialized]を使うことでInspector上にNickName変数を表示しないようにしている
     public NetworkString<_16> NickName { get; set; }
     [Networked] public NetworkButtons InputPrevious { get; set; }
     [Networked] private TickTimer Delay { get; set; }
+    private BulletContainer _bulletContainer;
     private PlayerView _playerView;
     private int _playerId = -1;
     private int _health = 100;
@@ -55,16 +54,18 @@ public class TankController : NetworkBehaviour, INetworkInput
         RotateBarrel(barrelObj, input.MousePos);
 
         if (pressed.IsSet(MyButtons.Attack))
-            //Rpc_Shot2(bulletInstancePos.transform.position,barrelObj.transform.rotation);
-            //Shot(bulletInstancePos.transform.position,barrelObj.transform.rotation);
+        {
             Rpc_FireBarrage();
+        }
         
         // jump (check for pressed)
-        if (pressed.IsSet(MyButtons.Jump)) {
+        if (pressed.IsSet(MyButtons.Jump)) 
+        {
         }
     }
     [Rpc(RpcSources.StateAuthority, RpcTargets.All, TickAligned = true)]
-    private void Rpc_FireBarrage(RpcInfo info = default) {
+    private void Rpc_FireBarrage(RpcInfo info = default) 
+    {
         _bulletContainer.FireBarrage(
             PlayerId, // プレイヤーID（誰が発射した弾か）
             transform.position, // 発射位置（弾幕がどこから発射されるか）
@@ -72,25 +73,18 @@ public class TankController : NetworkBehaviour, INetworkInput
             info.Tick // ティック（弾幕がいつ発射されたか）
         );
     }
-    // void Shot(Vector3 instancePosition, Quaternion direction)
-    // {
-    //     if (HasStateAuthority && Delay.ExpiredOrNotRunning(Runner))
-    //     {
-    //         Delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
-    //         var tmp = Runner.Spawn(bulletPrefab, instancePosition, direction, Object.InputAuthority,
-    //             (runner, o) => { o.GetComponent<Bullet>().Init(); });
-    //     }
-    // }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void Rpc_SetNickName(string nickName) {
+    private void Rpc_SetNickName(string nickName) 
+    {
         NickName = nickName;
     }
-    public void OnNickNameChanged() {
+    public void OnNickNameChanged() 
+    {
         // 更新されたプレイヤー名をテキストに反映する
         _playerView.SetNickName(NickName.Value);
     }
 
-    void TankMove(Vector3 vector)
+    private void TankMove(Vector3 vector)
     {
         float h = vector.x;
         float v = vector.y;
@@ -110,14 +104,13 @@ public class TankController : NetworkBehaviour, INetworkInput
         float angle = Mathf.Atan2(tmp.y, tmp.x) * Mathf.Rad2Deg;
         rotationObj.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
-    
-
     public void TakeDamage(int damage) { _health -= damage; }
     public void SetPlayerId(int playerId) { _playerId = playerId; }
 }
 public static class PlayerData
 {
-    public static string NickName {
+    public static string NickName 
+    {
         get => PlayerPrefs.GetString("NickName", "No Name");
         set => PlayerPrefs.SetString("NickName", value);
     }
