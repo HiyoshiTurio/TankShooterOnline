@@ -55,7 +55,8 @@ public class TankController : NetworkBehaviour, INetworkInput
 
         if (pressed.IsSet(MyButtons.Attack))
         {
-            Rpc_FireBarrage();
+            if(Object.HasInputAuthority)
+                Rpc_FireBarrage();
         }
         
         // jump (check for pressed)
@@ -63,7 +64,7 @@ public class TankController : NetworkBehaviour, INetworkInput
         {
         }
     }
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All, TickAligned = true)]
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All, TickAligned = true)]
     private void Rpc_FireBarrage(RpcInfo info = default) 
     {
         _bulletContainer.FireBarrage(

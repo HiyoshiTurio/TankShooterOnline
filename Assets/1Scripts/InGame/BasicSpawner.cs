@@ -8,8 +8,17 @@ using UnityEngine.SceneManagement;
 public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkPrefabRef playerPrefab;
+    [SerializeField] private GameObject bulletContainer;
     private NetworkRunner _runner;
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
+    public static BasicSpawner Instance;
+    public NetworkRunner Runner => _runner;
+
+    void Awake()
+    {
+        if(Instance == null)
+            Instance = this;
+    }
     async void StartGame(GameMode mode)
     {
         // Create the Fusion runner and let it know that we will be providing user input
@@ -31,6 +40,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             Scene = scene,
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
         });
+        _runner.AddGlobal(Instantiate(bulletContainer).GetComponent<BulletContainer>());
     }
     private void OnGUI()
     {
@@ -52,7 +62,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        if (runner.IsServer)
+        if (_runner.IsServer)
         {
             // Create a unique position for the player
             Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.PlayerCount) * 3, 1, 0);
@@ -99,6 +109,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             playerInput.Buttons.Set(MyButtons.Backward, true);
         }
         playerInput.MousePos = Input.mousePosition;
+        input.Set(playerInput);
     }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }

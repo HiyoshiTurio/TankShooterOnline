@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class BulletContainer : SimulationBehaviour
 {
-    private readonly List<Bullet_Contained> activeBullets = new(64);
-    private readonly Stack<Bullet_Contained> deactiveBullets = new(64);
     [SerializeField] GameObject bulletPrefab;
+    private readonly List<Bullet_Contained> _activeBullets = new(64);
+    private readonly Stack<Bullet_Contained> _deactiveBullets = new(64);
     private static BulletContainer _instance;
     public static BulletContainer Instance => _instance;
     
@@ -15,25 +15,25 @@ public class BulletContainer : SimulationBehaviour
     {
         _instance = this;
     }
-    void Start() 
+    public void Start()
     {
         // 弾の初期化
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < 64; i++) 
+        {
             var bullet = Instantiate(bulletPrefab, transform).GetComponent<Bullet_Contained>();
-            deactiveBullets.Push(bullet);
+            _deactiveBullets.Push(bullet);
         }
     }
     public override void FixedUpdateNetwork() 
     {
-        for (int i = activeBullets.Count - 1; i >= 0; i--) 
+        for (int i = _activeBullets.Count - 1; i >= 0; i--) 
         {
-            var bullet = activeBullets[i];
+            var bullet = _activeBullets[i];
             // 弾の消去判定を行う
             if (!bullet.IsAlive) 
             {
-                bullet.Deactivate();
-                activeBullets.Remove(bullet);
-                deactiveBullets.Push(bullet);
+                _activeBullets.Remove(bullet);
+                _deactiveBullets.Push(bullet);
             }
         }
     }
@@ -41,16 +41,15 @@ public class BulletContainer : SimulationBehaviour
     {
         float tick = Runner.Tick - 1 + Runner.LocalAlpha;
         // 弾の位置を更新する
-        foreach (var bullet in activeBullets) 
+        foreach (var bullet in _activeBullets) 
         {
             bullet.Render(tick, Runner.DeltaTime);
         }
     }
     public void FireBarrage(int playerId, Vector2 position, Quaternion direction, float tick)
     {
-        Debug.Log("Firing barrage");
-        Bullet_Contained bullet = deactiveBullets.Pop();
-        activeBullets.Add(bullet);
+        Bullet_Contained bullet = _deactiveBullets.Pop();
+        _activeBullets.Add(bullet);
         bullet.Init(playerId,position, direction,tick);
     }
 }

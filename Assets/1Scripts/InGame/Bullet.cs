@@ -1,42 +1,42 @@
-using Fusion;
 using UnityEngine;
 
-public class Bullet : NetworkBehaviour
+public class Bullet_Contained : MonoBehaviour
 {
-    [SerializeField,Header("弾の速度")] private float speed = 10f;
+    [SerializeField,Header("弾の速度")] private float speed = 2f;
     [SerializeField,Header("弾の消滅までの時間")] private float lifeTime = 1.0f;
-    [Networked] private TickTimer LifeTimer { get; set; }
-    private int _damage = 1;
-    private int _shooterId = -1;
+    private int _id;
+    private bool _isAlive = false;
+    private Vector2 _initialPosition;
+    private float _tick = 0.0f;
+    private float _timer = 0.0f;
+    public bool IsAlive => _isAlive;
     
-    public override void FixedUpdateNetwork()
+    public void Render(float tick, float deltaTime)
     {
-        if(LifeTimer.Expired(Runner))
-            Runner.Despawn(Object);
-        else
-            transform.position += transform.right * speed * Runner.DeltaTime;
-    }
-
-    public void Init()
-    {
-        LifeTimer = TickTimer.CreateFromSeconds(Runner, lifeTime);
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
+        transform.position += transform.right * speed * (deltaTime) * (tick - _tick);
+        _timer += deltaTime * (tick - _tick);
+        if (_timer >= lifeTime)
         {
-            TankController hitTank = other.GetComponent<TankController>();
-            if (hitTank.PlayerId != _shooterId)
-            {
-                hitTank.TakeDamage(_damage);
-                Runner.Despawn(Object);
-            }
+            Deactivate();
         }
     }
-    private void OnDestroy()
+    public void Init(int id, Vector2 pos, Quaternion direction, float tick)
     {
-        EffectManager.Instance.PlayAnimation(EffectType.Smoke,transform.position);
+        gameObject.SetActive(true);
+        _id = id;
+        _initialPosition = pos;
+        transform.position = pos;
+        transform.rotation = direction;
+        _tick = tick;
+        _isAlive = true;
+        _timer = 0.0f;
     }
-    public void SetShooterId(int id) { _shooterId = id; }
+
+    public void Deactivate()
+    {
+        if (_isAlive == false) return;
+        _isAlive = false;
+        EffectManager.Instance.PlayAnimation(EffectType.Smoke, transform.position);
+        gameObject.SetActive(false);
+    }
 }

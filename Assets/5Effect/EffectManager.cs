@@ -23,6 +23,7 @@ public class EffectManager : MonoBehaviour
 
     public void PlayAnimation(EffectType effectType, Vector3 objTransform)
     {
+        Debug.Log("PlayAnimation");
         switch (effectType)
         {
             case(EffectType.Smoke) :
