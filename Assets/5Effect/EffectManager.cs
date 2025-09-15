@@ -1,11 +1,10 @@
 using System;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class EffectManager : MonoBehaviour
 {
     [SerializeField] private GameObject smokeEffectPrefab;
-    GameObject _activeEffectPool; //アクティブ状態のオブジェクトプール
+    private GameObject _activeEffectPool; //アクティブ状態のオブジェクトプール
     private static EffectManager _instance;
     public static EffectManager Instance => _instance;
 
@@ -23,7 +22,6 @@ public class EffectManager : MonoBehaviour
 
     public void PlayAnimation(EffectType effectType, Vector3 objTransform)
     {
-        Debug.Log("PlayAnimation");
         switch (effectType)
         {
             case(EffectType.Smoke) :
