@@ -6,28 +6,31 @@ public class TankController : NetworkBehaviour, INetworkInput
     [SerializeField] private GameObject barrelObj;
     [SerializeField] private GameObject bulletInstancePos;
     [SerializeField,Header("移動速度")] private float moveSpeed = 3f;
-    [Networked,OnChangedRender(nameof(OnNickNameChanged))] 
-    [field: System.NonSerialized] //[field: System.NonSerialized]を使うことでInspector上にNickName変数を表示しないようにしている
-    public NetworkString<_16> NickName { get; set; }
     [Networked] public NetworkButtons InputPrevious { get; set; }
     [Networked] private TickTimer Delay { get; set; }
+    private int _health = 100;
     private BulletContainer _bulletContainer;
     private PlayerView _playerView;
-    private int _playerId = -1;
-    private int _health = 100;
-    public int PlayerId => _playerId;
+    [Networked]
+    public PlayerData PlayerData{ get; set; }
+    public int PlayerId => PlayerData.PlayerId;
+    [Networked] 
+    public ref PlayerData PlayerDataRef => ref MakeRef<PlayerData>();
 
     public override void Spawned()
     {
-        _playerView = GetComponent<PlayerView>();
-        _playerView.SetTransform(transform);
-        _playerView.SetNickName(NickName.Value);
-        
         if (Object.HasInputAuthority)
         {
+            PlayerDataRef.PlayerNameString = Runner.IsServer? "Host" : "Client";
             // RPCでプレイヤー名を設定する処理をホストに実行してもらう
-            Rpc_SetNickName(PlayerData.NickName);
+            SetNickName(PlayerDataRef.PlayerNameString);
+            
+            SetPlayerId(Runner.LocalPlayer.PlayerId);
         }
+        _playerView = GetComponent<PlayerView>();
+        _playerView.SetTransform(transform);
+        _playerView.SetNickName(PlayerDataRef.PlayerNameString);
+        _playerView.SetPlayerId(PlayerData.PlayerId);
         _bulletContainer = BulletContainer.Instance;
     }
     public override void FixedUpdateNetwork()
@@ -64,9 +67,10 @@ public class TankController : NetworkBehaviour, INetworkInput
         {
         }
     }
-    [Rpc(RpcSources.InputAuthority, RpcTargets.All, TickAligned = true)]
-    private void Rpc_FireBarrage(RpcInfo info = default) 
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    private void Rpc_FireBarrage(RpcInfo info = default)
     {
+        bool isOwner = info.Source.PlayerId == PlayerData.PlayerId;
         _bulletContainer.FireBarrage(
             PlayerId, // プレイヤーID（誰が発射した弾か）
             transform.position, // 発射位置（弾幕がどこから発射されるか）
@@ -74,16 +78,18 @@ public class TankController : NetworkBehaviour, INetworkInput
             info.Tick // ティック（弾幕がいつ発射されたか）
         );
     }
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void Rpc_SetNickName(string nickName) 
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    public void Rpc_GetDamage(int damage, RpcInfo info = default)
     {
-        NickName = nickName;
+        _health -= damage;
+        Debug.Log($"Player {PlayerData.PlayerName} took {_health} damage");
     }
-    public void OnNickNameChanged() 
+    private void SetNickName(string nickName) 
     {
-        // 更新されたプレイヤー名をテキストに反映する
-        _playerView.SetNickName(NickName.Value);
+        PlayerDataRef.PlayerNameString = nickName;
     }
+    public void SetPlayerId(int playerId) { PlayerDataRef.PlayerId = playerId; }
 
     private void TankMove(Vector3 vector)
     {
@@ -106,13 +112,19 @@ public class TankController : NetworkBehaviour, INetworkInput
         rotationObj.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
     public void TakeDamage(int damage) { _health -= damage; }
-    public void SetPlayerId(int playerId) { _playerId = playerId; }
 }
-public static class PlayerData
+
+public struct PlayerData: INetworkStruct
 {
-    public static string NickName 
+    public int PlayerId;
+    public NetworkString<_16> PlayerName;
+
+    public PlayerData(string playerName, int playerPlayerId)
     {
-        get => PlayerPrefs.GetString("NickName", "No Name");
-        set => PlayerPrefs.SetString("NickName", value);
+        PlayerId = playerPlayerId;
+        PlayerName = new NetworkString<_16>(playerName);
     }
+
+    [Networked][Capacity(16)][UnityMultiline]
+    public string PlayerNameString { get => default; set { } }
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Bullet_Contained : MonoBehaviour
@@ -9,6 +10,7 @@ public class Bullet_Contained : MonoBehaviour
     private Vector3 _initialPosition;
     private float _tick = 0.0f;
     private float _timer = 0.0f;
+    private int _damage = 1;
     public bool IsAlive => _isAlive;
     
     public void Init(int id, Vector2 pos, Quaternion direction, float tick)
@@ -34,7 +36,21 @@ public class Bullet_Contained : MonoBehaviour
          }
          transform.position = _initialPosition + transform.right * speed * (deltaTime) * (tick - _tick);
     }
-    // public void Render(float tick, float deltaTime)
+
+     private void OnTriggerEnter2D(Collider2D other)
+     {
+         if (other.CompareTag("Player"))
+         {
+             TankController tank =other.GetComponent<TankController>();
+             if (tank.PlayerId == _id)
+             {
+                 return;
+             }
+             tank.TakeDamage(_damage);
+             Debug.Log("Bullet hit player " + tank.PlayerId);
+         }
+     }
+     // public void Render(float tick, float deltaTime)
     // {
     //     _timer += Time.deltaTime;
     //     if (_timer >= lifeTime)

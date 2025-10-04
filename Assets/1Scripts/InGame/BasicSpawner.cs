@@ -9,6 +9,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkPrefabRef playerPrefab;
     [SerializeField] private GameObject bulletContainer;
+    [SerializeField] private PlayerDataUI playerDataUI;
     private NetworkRunner _runner;
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
     public static BasicSpawner Instance;
@@ -69,6 +70,10 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
             // Keep track of the player avatars for easy access
             _spawnedCharacters.Add(player, networkPlayerObject);
+            
+            TankController tank;
+            tank = networkPlayerObject.GetComponent<TankController>();
+            tank.PlayerData = new PlayerData(playerDataUI.playerName, player.PlayerId);
         }
     }
 
