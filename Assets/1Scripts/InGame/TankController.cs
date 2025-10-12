@@ -8,29 +8,24 @@ public class TankController : NetworkBehaviour, INetworkInput
     [SerializeField,Header("移動速度")] private float moveSpeed = 3f;
     [Networked] public NetworkButtons InputPrevious { get; set; }
     [Networked] private TickTimer Delay { get; set; }
-    private int _health = 100;
+    [Networked] private int Life{get; set;}
+    [Networked] private string PlayerName{get; set;}
     private BulletContainer _bulletContainer;
     private PlayerView _playerView;
-    [Networked]
-    public PlayerData PlayerData{ get; set; }
-    public int PlayerId => PlayerData.PlayerId;
-    [Networked] 
-    public ref PlayerData PlayerDataRef => ref MakeRef<PlayerData>();
 
     public override void Spawned()
     {
         if (Object.HasInputAuthority)
         {
-            PlayerDataRef.PlayerNameString = Runner.IsServer? "Host" : "Client";
+            PlayerName = Runner.IsServer? "Host" : "Client";
             // RPCでプレイヤー名を設定する処理をホストに実行してもらう
-            SetNickName(PlayerDataRef.PlayerNameString);
+            SetNickName(PlayerName);
             
             SetPlayerId(Runner.LocalPlayer.PlayerId);
         }
         _playerView = GetComponent<PlayerView>();
         _playerView.SetTransform(transform);
-        _playerView.SetNickName(PlayerDataRef.PlayerNameString);
-        _playerView.SetPlayerId(PlayerData.PlayerId);
+        _playerView.SetNickName(PlayerName);
         _bulletContainer = BulletContainer.Instance;
     }
     public override void FixedUpdateNetwork()
@@ -70,26 +65,18 @@ public class TankController : NetworkBehaviour, INetworkInput
     [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
     private void Rpc_FireBarrage(RpcInfo info = default)
     {
-        bool isOwner = info.Source.PlayerId == PlayerData.PlayerId;
         _bulletContainer.FireBarrage(
-            PlayerId, // プレイヤーID（誰が発射した弾か）
+            0, // プレイヤーID（誰が発射した弾か）
             transform.position, // 発射位置（弾幕がどこから発射されるか）
             barrelObj.transform.rotation, // 発射方向（弾幕がどの方向に発射されるか）
             info.Tick // ティック（弾幕がいつ発射されたか）
         );
     }
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
-    public void Rpc_GetDamage(int damage, RpcInfo info = default)
+    public void TakeDamage(int damage)
     {
-        _health -= damage;
-        Debug.Log($"Player {PlayerData.PlayerName} took {_health} damage");
+        Life -= damage;
     }
-    private void SetNickName(string nickName) 
-    {
-        PlayerDataRef.PlayerNameString = nickName;
-    }
-    public void SetPlayerId(int playerId) { PlayerDataRef.PlayerId = playerId; }
 
     private void TankMove(Vector3 vector)
     {
@@ -111,20 +98,4 @@ public class TankController : NetworkBehaviour, INetworkInput
         float angle = Mathf.Atan2(tmp.y, tmp.x) * Mathf.Rad2Deg;
         rotationObj.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
-    public void TakeDamage(int damage) { _health -= damage; }
-}
-
-public struct PlayerData: INetworkStruct
-{
-    public int PlayerId;
-    public NetworkString<_16> PlayerName;
-
-    public PlayerData(string playerName, int playerPlayerId)
-    {
-        PlayerId = playerPlayerId;
-        PlayerName = new NetworkString<_16>(playerName);
-    }
-
-    [Networked][Capacity(16)][UnityMultiline]
-    public string PlayerNameString { get => default; set { } }
 }

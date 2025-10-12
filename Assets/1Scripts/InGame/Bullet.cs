@@ -50,16 +50,6 @@ public class Bullet_Contained : MonoBehaviour
              Debug.Log("Bullet hit player " + tank.PlayerId);
          }
      }
-     // public void Render(float tick, float deltaTime)
-    // {
-    //     _timer += Time.deltaTime;
-    //     if (_timer >= lifeTime)
-    //     {
-    //         Deactivate();
-    //         transform.position = _initialPosition + transform.right * speed * lifeTime;
-    //     }
-    //     transform.position = _initialPosition + transform.right * speed * _timer;
-    // }
 
     public void Deactivate()
     {
